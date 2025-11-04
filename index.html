@@ -96,15 +96,20 @@
     .weekday{color:var(--muted);font-size:11px;text-align:center;margin-bottom:6px}
     .day{
       position:relative;border:1px dashed var(--border);border-radius:8px;
-      min-height:42px;padding:4px 6px;cursor:default;color:var(--text);
-      display:flex;align-items:flex-start;justify-content:flex-end;opacity:.7
+      min-height:60px;padding:4px 6px;cursor:default;color:var(--text);
+      display:flex;align-items:flex-start;justify-content:flex-end;overflow:hidden;
+      background-size:cover;background-position:center;background-repeat:no-repeat;
     }
     .day.has-file{cursor:pointer}
     .day.filled{
-      background:var(--good); border:1px solid var(--border); opacity:1
+      background:var(--good); border:1px solid var(--border);
+    }
+    .day.has-img::after {
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(to bottom right, rgba(0,0,0,.15), rgba(0,0,0,.4));
     }
     .day:hover{border-style:solid}
-    .day-num{font-size:12px;opacity:.9}
+    .day-num{font-size:12px;opacity:.9; position:relative; z-index:2; color:#fff; font-weight:600; text-shadow:0 1px 3px rgba(0,0,0,.8)}
     .badge{
       position:absolute;left:6px;bottom:4px;font-size:12px;opacity:.9
     }
@@ -118,7 +123,7 @@
   <div class="actions">
     <button id="pickJournal">Select Journal Root</button>
     <button id="pickImages">Select Images Root</button>
-    <span class="tint">\01-Journal\YYYY\MM • \Images\YYYY\YYYYMMDD(-NN).jpg|png|gif</span>
+    <span class="tint">\\01-Journal\\YYYY\\MM • \\Images\\YYYY\\YYYYMMDD(-NN).jpg|png|gif</span>
   </div>
   <div class="actions">
     <select id="yearSelect" disabled></select>
@@ -171,12 +176,12 @@
 const Utils = {
   byId: (id) => document.getElementById(id),
   esc: (s) => s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])),
-  stripYAML(text) { return text.replace(/^---[\s\S]*?---/, ''); },
+  stripYAML(text) { return text.replace(/^---[\\s\\S]*?---/, ''); },
   extractYAML(text) {
-    const m = text.match(/^---\s*([\s\S]*?)\s*---/);
+    const m = text.match(/^---\\s*([\\s\\S]*?)\\s*---/);
     if (!m) return null;
     const block = m[1];
-    const kv = block.split('\n')
+    const kv = block.split('\\n')
       .map(l => l.trim())
       .filter(l => l && l.includes(':'))
       .map(l => {
@@ -334,15 +339,15 @@ const Indexer = {
     statusEl.textContent = 'Indexing...';
     State.index = {};
     for await (const [yearName, yDir] of State.journalRoot.entries()) {
-      if (yDir.kind !== 'directory' || !/^\d{4}$/.test(yearName)) continue;
+      if (yDir.kind !== 'directory' || !/^\\d{4}$/.test(yearName)) continue;
       State.index[yearName] = {};
       for await (const [monthName, mDir] of yDir.entries()) {
-        if (mDir.kind !== 'directory' || !/^\d{1,2}$/.test(monthName)) continue;
+        if (mDir.kind !== 'directory' || !/^\\d{1,2}$/.test(monthName)) continue;
         const m = monthName.padStart(2,'0');
         const list = [];
         for await (const [fname, fh] of mDir.entries()) {
           if (fh.kind !== 'file' || !fname.toLowerCase().endsWith('.md')) continue;
-          const m2 = fname.match(/^(\d{8})\s*-\s*(.+)\.md$/);
+          const m2 = fname.match(/^(\\d{8})\\s*-\\s*(.+)\\.md$/);
           if (!m2) continue;
           list.push({year:yearName, month:m, date:m2[1], name:fname, handle:fh});
         }
@@ -388,7 +393,6 @@ const Calendar = (() => {
     const firstDow = new Date(`${year}-${month}-01`).getDay(); // 0-6
     const days = Utils.daysInMonth(Number(year), Number(month));
 
-    // Dynamic height: just render the exact number of rows needed
     // Add leading blanks for offset
     for (let i=0;i<firstDow;i++){
       const blank = document.createElement('div');
@@ -408,12 +412,6 @@ const Calendar = (() => {
       num.textContent = d;
       cell.appendChild(num);
 
-      // Photo badge (filled after async)
-      const badge = document.createElement('div');
-      badge.className = 'badge hidden';
-      badge.textContent = '📷';
-      cell.appendChild(badge);
-
       const entry = map.get(dd);
       if (entry) {
         cell.classList.add('has-file');
@@ -423,28 +421,29 @@ const Calendar = (() => {
           const file = await entry.handle.getFile();
           let t = await file.text();
           t = Utils.stripYAML(t);
-          t = t.replace(/!\[[^\]]*\]\([^)]+\)/g,'')  // remove images
-               .replace(/\[[^\]]*\]\([^)]+\)/g,'')   // remove links
+          t = t.replace(/!\\[[^\\]]*\\]\\([^)]+\\)/g,'')  // remove images
+               .replace(/\\[[^\\]]*\\]\\([^)]+\\)/g,'')   // remove links
                .replace(/[*#`>_~]/g,'')              // remove md symbols
                .trim();
           const hasMeaningful = t.length > 0; // emojis count
           if (hasMeaningful) cell.classList.add('filled'); // solid look per Option 1
 
-          // Photo badge
+          // NEW: Photo as background for the calendar cell
           try {
             if (State.imagesRoot) {
               const yDir = await State.imagesRoot.getDirectoryHandle(entry.year,{create:false});
               const imgs = await FS.enumerateAllImages(yDir, entry.date);
-              if (imgs.length) badge.classList.remove('hidden');
+              if (imgs.length) {
+                const thumbURL = imgs[0].url;
+                cell.style.backgroundImage = `url("${thumbURL}")`;
+                cell.classList.add('has-img');
+              }
             }
           } catch {}
         })();
 
         // Open entry on click
         cell.addEventListener('click', () => UI.openEntry(entry));
-      } else {
-        // No file at all → treat similar to empty look (outlined, low opacity), not clickable
-        // cell remains default .day
       }
 
       grid.appendChild(cell);
@@ -564,11 +563,11 @@ const UI = (() => {
           const file = await entry.handle.getFile();
           let t = await file.text();
           t = Utils.stripYAML(t);
-          t = t.replace(/!\[[^\]]*\]\([^)]+\)/g,'')
-               .replace(/\[[^\]]*\]\([^)]+\)/g,'')
+          t = t.replace(/!\\[[^\\]]*\\]\\([^)]+\\)/g,'')
+               .replace(/\\[[^\\]]*\\]\\([^)]+\\)/g,'')
                .replace(/[*#`>_~]/g,'')
                .trim();
-          const first = t.split('\n').map(s=>s.trim()).filter(Boolean)[0] || '(Empty Entry)';
+          const first = t.split('\\n').map(s=>s.trim()).filter(Boolean)[0] || '(Empty Entry)';
           preview.textContent = first;
         } catch { preview.textContent = '(Preview unavailable)'; }
       })();
@@ -639,7 +638,7 @@ const Gallery = {
     try { yearDir = await State.imagesRoot.getDirectoryHandle(entry.year,{create:false}); }
     catch { return; }
 
-    const filenameRe = /(\d{8})(-\d{2})?\.(jpe?g|png|gif)$/i;
+    const filenameRe = /(\\d{8})(-\\d{2})?\\.(jpe?g|png|gif)$/i;
     const ordered = [];
     for (const src of inlineSrcs) {
       const m = src.match(filenameRe);
