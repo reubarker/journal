@@ -1,130 +1,116 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>Journal Viewer (Read-only)</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<style>
-  /* THEME TOKENS */
-  :root {
-    --bg:#0b0d10; --panel:#14181d; --muted:#94a3b8; --text:#e5e7eb; --accent:#60a5fa;
-    --border:#1f2937; --card:#0b1220; --cardHover:#0f1626; --chip:#0f172a; --thumbBg:#0b0d10;
-    --good:#1f3a8a;
-  }
-  body.light {
-    --bg:#f6f7f9; --panel:#ffffff; --muted:#6b7280; --text:#111827; --accent:#2563eb;
-    --border:#e5e7eb; --card:#ffffff; --cardHover:#f3f4f6; --chip:#f3f4f6; --thumbBg:#f3f4f6;
-    --good:#dbeafe;
-  }
+  <meta charset="utf-8" />
+  <title>Journal Viewer (Read-only)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* THEME TOKENS */
+    :root {
+      --bg:#0b0d10; --panel:#14181d; --muted:#94a3b8; --text:#e5e7eb; --accent:#60a5fa;
+      --border:#1f2937; --card:#0b1220; --cardHover:#0f1626; --chip:#0f172a; --thumbBg:#0b0d10;
+      --good:#1f3a8a; /* filled bg (darkened accent) */
+    }
+    body.light {
+      --bg:#f6f7f9; --panel:#ffffff; --muted:#6b7280; --text:#111827; --accent:#2563eb;
+      --border:#e5e7eb; --card:#ffffff; --cardHover:#f3f4f6; --chip:#f3f4f6; --thumbBg:#f3f4f6;
+      --good:#dbeafe; /* light accent fill */
+    }
 
-  /* BASE */
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,Segoe UI,Roboto,Arial}
+    /* BASE */
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,Segoe UI,Roboto,Arial}
 
-  header{
-    display:flex;gap:.5rem;align-items:center;justify-content:space-between;
-    padding:10px 12px;border-bottom:1px solid var(--border);background:var(--panel);
-    position:sticky;top:0;z-index:5
-  }
-  header .actions{display:flex;gap:.5rem;flex-wrap:wrap}
-  button, select{
-    background:var(--chip);color:var(--text);border:1px solid var(--border);
-    border-radius:8px;padding:.5rem .75rem;cursor:pointer
-  }
-  button:hover{border-color:#334155}
-  .tint{color:var(--muted);font-size:12px;margin-left:.5rem}
+    header{
+      display:flex;gap:.5rem;align-items:center;justify-content:space-between;
+      padding:10px 12px;border-bottom:1px solid var(--border);background:var(--panel);
+      position:sticky;top:0;z-index:5
+    }
+    header .actions{display:flex;gap:.5rem;flex-wrap:wrap}
+    button, select{
+      background:var(--chip);color:var(--text);border:1px solid var(--border);
+      border-radius:8px;padding:.5rem .75rem;cursor:pointer
+    }
+    button:hover{border-color:#334155}
+    .tint{color:var(--muted);font-size:12px;margin-left:.5rem}
 
-  main{display:grid;grid-template-columns:40% 60%;height:calc(100vh - 56px)}
+    main{display:grid;grid-template-columns:40% 60%;height:calc(100vh - 56px)}
 
-  /* SIDEBAR */
-  aside{border-right:1px solid var(--border);overflow:auto;background:var(--panel)}
-  .toolbar{display:flex;gap:.5rem;padding:10px;border-bottom:1px solid var(--border);
-    position:sticky;top:0;background:var(--panel);z-index:4;align-items:center;justify-content:space-between}
-  .list{padding:8px}
-  .card{
-    display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:start;
-    padding:8px;border-radius:10px;border:1px solid var(--border);background:var(--card);
-    margin-bottom:8px;cursor:pointer
-  }
-  .card:hover{background:var(--cardHover)}
-  .thumb{width:64px;height:64px;border-radius:8px;object-fit:cover;background:var(--thumbBg);border:1px solid var(--border)}
-  .meta{display:flex;flex-direction:column;gap:2px}
-  .filename{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .sub{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .preview{
-    color:var(--muted);font-size:12px;margin-top:4px;max-height:1.3em;overflow:hidden;
-    display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical
-  }
+    /* SIDEBAR */
+    aside{border-right:1px solid var(--border);overflow:auto;background:var(--panel)}
+    .toolbar{display:flex;gap:.5rem;padding:10px;border-bottom:1px solid var(--border);
+      position:sticky;top:0;background:var(--panel);z-index:4;align-items:center;justify-content:space-between}
+    .list{padding:8px}
+    .card{
+      display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:start;
+      padding:8px;border-radius:10px;border:1px solid var(--border);background:var(--card);
+      margin-bottom:8px;cursor:pointer
+    }
+    .card:hover{background:var(--cardHover)}
+    .thumb{width:64px;height:64px;border-radius:8px;object-fit:cover;background:var(--thumbBg);border:1px solid var(--border)}
+    .meta{display:flex;flex-direction:column;gap:2px}
+    .filename{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sub{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .preview{
+      color:var(--muted);font-size:12px;margin-top:4px;max-height:1.3em;overflow:hidden;
+      display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical
+    }
 
-  /* READER */
-  article{overflow:auto;padding:16px}
-  .reader-title{font-size:1.4rem;font-weight:600;margin-bottom:1rem;color:var(--text);word-break:break-word}
-  .metadata-box{
-    background:var(--chip);border:1px solid var(--border);border-radius:8px;
-    padding:10px 12px;margin-bottom:20px;font-size:13px
-  }
-  .meta-row{display:flex;gap:6px;border-bottom:1px solid var(--border);padding:3px 0}
-  .meta-row:last-child{border-bottom:none}
-  .meta-key{color:var(--muted);min-width:80px;font-weight:600;text-transform:capitalize}
-  .meta-val{color:var(--text);flex:1;word-break:break-word}
-  .md{max-width:900px;margin:0 auto}
-  .md h1,.md h2,.md h3{margin-top:1.2em}
-  .md img{max-width:100%;border-radius:10px;border:1px solid var(--border)}
-  .empty{opacity:.8;color:var(--muted);text-align:center;margin-top:20vh}
+    /* READER */
+    article{overflow:auto;padding:16px}
+    .reader-title{font-size:1.4rem;font-weight:600;margin-bottom:1rem;color:var(--text);word-break:break-word}
+    .metadata-box{
+      background:var(--chip);border:1px solid var(--border);border-radius:8px;
+      padding:10px 12px;margin-bottom:20px;font-size:13px
+    }
+    .meta-row{display:flex;gap:6px;border-bottom:1px solid var(--border);padding:3px 0}
+    .meta-row:last-child{border-bottom:none}
+    .meta-key{color:var(--muted);min-width:80px;font-weight:600;text-transform:capitalize}
+    .meta-val{color:var(--text);flex:1;word-break:break-word}
 
-  /* GALLERY */
-  .gallery{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 8px 0}
-  .g-thumb{width:72px;height:72px;border:1px solid var(--border);border-radius:8px;object-fit:cover;cursor:pointer}
-  .g-thumb.selected{outline:2px solid var(--accent)}
-  .hero{display:block;max-width:100%;max-height:60vh;border:1px solid var(--border);border-radius:10px;margin:18px 0;cursor:pointer}
+    .md{max-width:900px;margin:0 auto}
+    .md h1,.md h2,.md h3{margin-top:1.2em}
+    .md img{max-width:100%;border-radius:10px;border:1px solid var(--border)}
 
-  /* LIGHTBOX */
-  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:50}
-  .lightbox.open{display:flex}
-  .lightbox img{max-width:90vw;max-height:90vh;border-radius:10px;background:#000}
-  .lb-controls{position:fixed;bottom:24px;display:flex;gap:8px}
-  .lb-btn{background:#111827;color:#fff;border:1px solid #374151;border-radius:8px;padding:.5rem .75rem;cursor:pointer}
+    .empty{opacity:.8;color:var(--muted);text-align:center;margin-top:20vh}
 
-  /* MONTH GRID — UPDATED FOR IMAGE FILL */
-  .month-wrap{padding:10px 10px 0 10px;border-bottom:1px dashed var(--border)}
-  .month-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;color:var(--muted);font-size:12px}
-  .month-grid{
-    display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px
-  }
-  .weekday{color:var(--muted);font-size:11px;text-align:center;margin-bottom:6px}
+    /* GALLERY (below the body) */
+    .gallery{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 8px 0}
+    .g-thumb{width:72px;height:72px;border:1px solid var(--border);border-radius:8px;object-fit:cover;cursor:pointer}
+    .g-thumb.selected{outline:2px solid var(--accent)}
+    .hero{display:block;max-width:100%;max-height:60vh;border:1px solid var(--border);border-radius:10px;margin:18px 0;cursor:pointer}
 
-  .day {
-    position: relative;
-    border: 1px dashed var(--border);
-    border-radius: 8px;
-    min-height: 60px;
-    padding: 4px 6px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
-    overflow: hidden;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-  .day.has-img::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom right, rgba(0,0,0,.15), rgba(0,0,0,.4));
-  }
-  .day-num {
-    position: relative;
-    z-index: 2;
-    font-size: 12px;
-    font-weight: 600;
-    text-shadow: 0 1px 3px rgba(0,0,0,.8);
-    color: #fff;
-  }
+    /* LIGHTBOX */
+    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:50}
+    .lightbox.open{display:flex}
+    .lightbox img{max-width:90vw;max-height:90vh;border-radius:10px;background:#000}
+    .lb-controls{position:fixed;bottom:24px;display:flex;gap:8px}
+    .lb-btn{background:#111827;color:#fff;border:1px solid #374151;border-radius:8px;padding:.5rem .75rem;cursor:pointer}
 
-  .hidden{visibility:hidden}
-</style>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    /* MONTH GRID (Hybrid) */
+    .month-wrap{padding:10px 10px 0 10px;border-bottom:1px dashed var(--border)}
+    .month-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;color:var(--muted);font-size:12px}
+    .month-grid{
+      display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px
+    }
+    .weekday{color:var(--muted);font-size:11px;text-align:center;margin-bottom:6px}
+    .day{
+      position:relative;border:1px dashed var(--border);border-radius:8px;
+      min-height:42px;padding:4px 6px;cursor:default;color:var(--text);
+      display:flex;align-items:flex-start;justify-content:flex-end;opacity:.7
+    }
+    .day.has-file{cursor:pointer}
+    .day.filled{
+      background:var(--good); border:1px solid var(--border); opacity:1
+    }
+    .day:hover{border-style:solid}
+    .day-num{font-size:12px;opacity:.9}
+    .badge{
+      position:absolute;left:6px;bottom:4px;font-size:12px;opacity:.9
+    }
+    .hidden{visibility:hidden}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 <body>
@@ -148,13 +134,15 @@
       <span id="status" class="tint"></span>
     </div>
 
-    <!-- MONTH GRID -->
+    <!-- HYBRID MONTH GRID -->
     <div id="monthWrap" class="month-wrap" hidden>
       <div class="month-title">
         <div id="monthLabel">Month YYYY</div>
         <div class="tint">Click a day to open (if a file exists)</div>
       </div>
-      <div class="month-grid" id="monthGrid"></div>
+      <div class="month-grid" id="monthGrid">
+        <!-- Weekday labels row -->
+      </div>
     </div>
 
     <div id="entries" class="list"></div>
@@ -177,70 +165,564 @@
 </div>
 
 <script type="module">
-/* — Util, Theme, Storage, Indexer unchanged — */
+/* ===========================
+   Utils
+=========================== */
+const Utils = {
+  byId: (id) => document.getElementById(id),
+  esc: (s) => s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])),
+  stripYAML(text) { return text.replace(/^---[\s\S]*?---/, ''); },
+  extractYAML(text) {
+    const m = text.match(/^---\s*([\s\S]*?)\s*---/);
+    if (!m) return null;
+    const block = m[1];
+    const kv = block.split('\n')
+      .map(l => l.trim())
+      .filter(l => l && l.includes(':'))
+      .map(l => {
+        const [k,...v] = l.split(':');
+        return { key: k.trim(), val: v.join(':').trim() };
+      });
+    return kv;
+  },
+  niceDate(yyyymmdd) {
+    const yyyy = yyyymmdd.slice(0,4), mm = yyyymmdd.slice(4,6), dd = yyyymmdd.slice(6,8);
+    const d = new Date(`${yyyy}-${mm}-${dd}`);
+    return {
+      human: `${d.toLocaleDateString(undefined,{weekday:'long'})}, ${d.toLocaleDateString(undefined,{month:'long'})} ${dd}`,
+      numeric: `${dd}/${mm}/${yyyy}`,
+      dow: d.getDay()
+    };
+  },
+  daysInMonth(y, m) { return new Date(y, m, 0).getDate(); }, // m = 1..12
+  pad(n){ return String(n).padStart(2,'0'); }
+};
 
-/* CALENDAR UPDATE — ONLY THIS PART CHANGED */
-async function renderCalendarImages(cell, entry) {
-  try {
-    if (State.imagesRoot) {
-      const yDir = await State.imagesRoot.getDirectoryHandle(entry.year, { create:false });
-      const imgs = await FS.enumerateAllImages(yDir, entry.date);
-      if (imgs.length) {
-        cell.style.backgroundImage = `url("${imgs[0].url}")`;
-        cell.classList.add('has-img');
+/* ===========================
+   State
+=========================== */
+const State = {
+  journalRoot: null,
+  imagesRoot: null,
+  index: {},                    // {year: {month: [entries]}}
+  objectURLCache: new Map(),    // FileSystemFileHandle -> objectURL
+  currentGallery: [],
+  currentGalleryIndex: -1,
+  extList: ['jpg','jpeg','png','gif'],
+};
+
+/* ===========================
+   Theme
+=========================== */
+const themeBtn = Utils.byId('themeToggle');
+(function initTheme(){
+  const saved = localStorage.getItem('journal_theme') || 'dark';
+  if (saved === 'light') document.body.classList.add('light');
+  themeBtn.textContent = document.body.classList.contains('light') ? 'Dark' : 'Light';
+  themeBtn.addEventListener('click', ()=>{
+    document.body.classList.toggle('light');
+    localStorage.setItem('journal_theme', document.body.classList.contains('light') ? 'light' : 'dark');
+    themeBtn.textContent = document.body.classList.contains('light') ? 'Dark' : 'Light';
+  });
+})();
+
+/* ===========================
+   Storage (IndexedDB handles)
+=========================== */
+const Storage = (() => {
+  const DB_NAME = 'journal-viewer-db';
+  const STORE = 'handles';
+  function open() {
+    return new Promise((resolve,reject)=>{
+      const req = indexedDB.open(DB_NAME,1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async function put(key, val) {
+    const db = await open();
+    return new Promise((resolve,reject)=>{
+      const tx = db.transaction(STORE,'readwrite');
+      tx.objectStore(STORE).put(val,key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+  async function get(key) {
+    const db = await open();
+    return new Promise((resolve,reject)=>{
+      const tx = db.transaction(STORE,'readonly');
+      const req = tx.objectStore(STORE).get(key);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  return { put, get };
+})();
+
+/* ===========================
+   FS helpers
+=========================== */
+const FS = {
+  async requestRead(handle) {
+    if (!handle) return false;
+    const p = await handle.queryPermission({mode:'read'});
+    if (p === 'granted') return true;
+    const r = await handle.requestPermission({mode:'read'});
+    return r === 'granted';
+  },
+  async fileHandleToURL(fh) {
+    if (State.objectURLCache.has(fh)) return State.objectURLCache.get(fh);
+    const file = await fh.getFile();
+    const url = URL.createObjectURL(file);
+    State.objectURLCache.set(fh, url);
+    return url;
+  },
+  async findFirstImageURL(yearDir, yyyymmdd) {
+    const yyyy = yyyymmdd.slice(0,4), mm=yyyymmdd.slice(4,6), dd=yyyymmdd.slice(6,8);
+    const newBase = yyyymmdd;
+    const oldBase = `${mm}${dd}${yyyy}`;
+    const candidates = [];
+    for (const base of [newBase, oldBase]) {
+      for (const ext of State.extList) candidates.push(`${base}.${ext}`);
+      for (let i=1;i<=5;i++){
+        const s='-'+String(i).padStart(2,'0');
+        for (const ext of State.extList) candidates.push(`${base}${s}.${ext}`);
       }
     }
-  } catch {}
-}
-
-/* Modify Calendar.render() */
-Calendar.render = async function(year, month) {
-  const items = State.index[year]?.[month] || [];
-  wrap.hidden = false;
-  clear();
-
-  label.textContent = new Date(`${year}-${month}-01`)
-    .toLocaleDateString(undefined,{month:'long',year:'numeric'})
-    .toUpperCase();
-
-  const header = document.createDocumentFragment();
-  weekdays.forEach(w=>{
-    const h=document.createElement('div');
-    h.className='weekday';
-    h.textContent=w;
-    header.appendChild(h);
-  });
-  grid.appendChild(header);
-
-  const firstDow=new Date(`${year}-${month}-01`).getDay();
-  const days=Utils.daysInMonth(Number(year),Number(month));
-
-  for(let i=0;i<firstDow;i++) grid.appendChild(document.createElement('div'));
-
-  const map=new Map();
-  items.forEach(e=>map.set(e.date.slice(6,8),e));
-
-  for(let d=1;d<=days;d++){
-    const dd=Utils.pad(d);
-    const cell=document.createElement('div');
-    cell.className='day';
-
-    const num=document.createElement('div');
-    num.className='day-num';
-    num.textContent=d;
-    cell.appendChild(num);
-
-    const entry=map.get(dd);
-    if(entry){
-      cell.classList.add('has-file');
-      cell.addEventListener('click',()=>UI.openEntry(entry));
-      renderCalendarImages(cell, entry); // ✅ NEW VERSION
+    for (const name of candidates) {
+      try {
+        const fh = await yearDir.getFileHandle(name,{create:false});
+        return await FS.fileHandleToURL(fh);
+      } catch {}
     }
-    grid.appendChild(cell);
+    return null;
+  },
+  async enumerateAllImages(yearDir, yyyymmdd) {
+    const yyyy = yyyymmdd.slice(0,4), mm=yyyymmdd.slice(4,6), dd=yyyymmdd.slice(6,8);
+    const bases = [yyyymmdd, `${mm}${dd}${yyyy}`];
+    const list = [];
+    for (const base of bases) {
+      const names = [];
+      for (const ext of State.extList) names.push(`${base}.${ext}`);
+      for (let i=1;i<=20;i++){
+        const s='-'+String(i).padStart(2,'0');
+        for (const ext of State.extList) names.push(`${base}${s}.${ext}`);
+      }
+      for (const n of names) {
+        try {
+          const fh = await yearDir.getFileHandle(n,{create:false});
+          const url = await FS.fileHandleToURL(fh);
+          list.push({url, name:n});
+        } catch {}
+      }
+      if (list.length) break;
+    }
+    return list;
   }
+};
+
+/* ===========================
+   Indexer
+=========================== */
+const Indexer = {
+  async rebuild(statusEl) {
+    statusEl.textContent = 'Indexing...';
+    State.index = {};
+    for await (const [yearName, yDir] of State.journalRoot.entries()) {
+      if (yDir.kind !== 'directory' || !/^\d{4}$/.test(yearName)) continue;
+      State.index[yearName] = {};
+      for await (const [monthName, mDir] of yDir.entries()) {
+        if (mDir.kind !== 'directory' || !/^\d{1,2}$/.test(monthName)) continue;
+        const m = monthName.padStart(2,'0');
+        const list = [];
+        for await (const [fname, fh] of mDir.entries()) {
+          if (fh.kind !== 'file' || !fname.toLowerCase().endsWith('.md')) continue;
+          const m2 = fname.match(/^(\d{8})\s*-\s*(.+)\.md$/);
+          if (!m2) continue;
+          list.push({year:yearName, month:m, date:m2[1], name:fname, handle:fh});
+        }
+        list.sort((a,b)=>a.date.localeCompare(b.date));
+        State.index[yearName][m] = list;
+      }
+    }
+    statusEl.textContent = '';
+  }
+};
+
+/* ===========================
+   Calendar (Hybrid month grid)
+=========================== */
+const Calendar = (() => {
+  const wrap = Utils.byId('monthWrap');
+  const grid = Utils.byId('monthGrid');
+  const label = Utils.byId('monthLabel');
+  const weekdays = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  function clear() { grid.innerHTML = ''; }
+
+  async function render(year, month) {
+    const items = (State.index[year] && State.index[year][month]) || [];
+    wrap.hidden = false;
+    clear();
+
+    const monthName = new Date(`${year}-${month}-01`)
+      .toLocaleDateString(undefined, { month:'long', year:'numeric' })
+      .toUpperCase();
+    label.textContent = monthName;
+
+    // Weekday labels
+    const header = document.createDocumentFragment();
+    weekdays.forEach(w=>{
+      const h = document.createElement('div');
+      h.className = 'weekday';
+      h.textContent = w;
+      header.appendChild(h);
+    });
+    grid.appendChild(header);
+
+    const firstDow = new Date(`${year}-${month}-01`).getDay(); // 0-6
+    const days = Utils.daysInMonth(Number(year), Number(month));
+
+    // Dynamic height: just render the exact number of rows needed
+    // Add leading blanks for offset
+    for (let i=0;i<firstDow;i++){
+      const blank = document.createElement('div');
+      grid.appendChild(blank);
+    }
+
+    // Build a quick map date->entry (there should be at most one)
+    const map = new Map();
+    items.forEach(e => map.set(e.date.slice(6,8), e)); // key = dd
+
+    for (let d=1; d<=days; d++){
+      const dd = Utils.pad(d);
+      const cell = document.createElement('div');
+      cell.className = 'day';
+      const num = document.createElement('div');
+      num.className = 'day-num';
+      num.textContent = d;
+      cell.appendChild(num);
+
+      // Photo badge (filled after async)
+      const badge = document.createElement('div');
+      badge.className = 'badge hidden';
+      badge.textContent = '📷';
+      cell.appendChild(badge);
+
+      const entry = map.get(dd);
+      if (entry) {
+        cell.classList.add('has-file');
+
+        // Determine emptiness by reading + stripping (emojis count as content)
+        (async ()=>{
+          const file = await entry.handle.getFile();
+          let t = await file.text();
+          t = Utils.stripYAML(t);
+          t = t.replace(/!\[[^\]]*\]\([^)]+\)/g,'')  // remove images
+               .replace(/\[[^\]]*\]\([^)]+\)/g,'')   // remove links
+               .replace(/[*#`>_~]/g,'')              // remove md symbols
+               .trim();
+          const hasMeaningful = t.length > 0; // emojis count
+          if (hasMeaningful) cell.classList.add('filled'); // solid look per Option 1
+
+          // Photo badge
+          try {
+            if (State.imagesRoot) {
+              const yDir = await State.imagesRoot.getDirectoryHandle(entry.year,{create:false});
+              const imgs = await FS.enumerateAllImages(yDir, entry.date);
+              if (imgs.length) badge.classList.remove('hidden');
+            }
+          } catch {}
+        })();
+
+        // Open entry on click
+        cell.addEventListener('click', () => UI.openEntry(entry));
+      } else {
+        // No file at all → treat similar to empty look (outlined, low opacity), not clickable
+        // cell remains default .day
+      }
+
+      grid.appendChild(cell);
+    }
+  }
+
+  return { render };
+})();
+
+/* ===========================
+   Gallery + Lightbox
+=========================== */
+const lb = Utils.byId('lightbox');
+const lbImg = Utils.byId('lbImg');
+Utils.byId('lbPrev').addEventListener('click', ()=> stepLightbox(-1));
+Utils.byId('lbNext').addEventListener('click', ()=> stepLightbox(1));
+Utils.byId('lbClose').addEventListener('click', closeLightbox);
+lb.addEventListener('click', (e)=>{ if (e.target===lb) closeLightbox(); });
+
+function openLightbox(startIndex){
+  if (!State.currentGallery.length) return;
+  State.currentGalleryIndex = startIndex;
+  lbImg.src = State.currentGallery[State.currentGalleryIndex].url;
+  lb.classList.add('open');
+  lb.setAttribute('aria-hidden','false');
+}
+function closeLightbox(){
+  lb.classList.remove('open');
+  lb.setAttribute('aria-hidden','true');
+}
+function stepLightbox(delta){
+  if (!State.currentGallery.length) return;
+  State.currentGalleryIndex = (State.currentGalleryIndex + delta + State.currentGallery.length) % State.currentGallery.length;
+  lbImg.src = State.currentGallery[State.currentGalleryIndex].url;
 }
 
-/* — Rest of script unchanged — */
+/* ===========================
+   UI (list + reader)
+=========================== */
+const UI = (() => {
+  const entriesList = Utils.byId('entries');
+  const reader = Utils.byId('reader');
+  const yearSel = Utils.byId('yearSelect');
+  const monthSel = Utils.byId('monthSelect');
+  const statusEl = Utils.byId('status');
+
+  function clearReader() {
+    reader.innerHTML = `<div class="empty">Select an entry</div>`;
+    State.currentGallery = [];
+    State.currentGalleryIndex = -1;
+  }
+
+  async function renderSelectors() {
+    const years = Object.keys(State.index).sort();
+    yearSel.innerHTML = years.map(y=>`<option value="${y}">${y}</option>`).join('');
+    yearSel.disabled = !years.length;
+    const initialYear = localStorage.getItem('last_year') || years[0] || '';
+    if (initialYear && years.includes(initialYear)) yearSel.value = initialYear;
+
+    renderMonths(yearSel.value);
+
+    yearSel.onchange = () => {
+      localStorage.setItem('last_year', yearSel.value);
+      renderMonths(yearSel.value);
+    };
+    monthSel.onchange = () => {
+      localStorage.setItem('last_month', monthSel.value);
+      clearReader();
+      if (yearSel.value && monthSel.value) {
+        Calendar.render(yearSel.value, monthSel.value);
+        renderEntries(yearSel.value, monthSel.value);
+      }
+    };
+  }
+
+  function renderMonths(year) {
+    const months = Object.keys(State.index[year]||{}).sort();
+    monthSel.innerHTML = months.map(m=>`<option value="${m}">${m}</option>`).join('');
+    monthSel.disabled = !months.length;
+    const lastMonth = localStorage.getItem('last_month');
+    if (lastMonth && months.includes(lastMonth)) monthSel.value = lastMonth;
+
+    if (months.length) {
+      Calendar.render(year, monthSel.value || months[0]);
+      renderEntries(year, monthSel.value || months[0]);
+    }
+  }
+
+  async function renderEntries(year, month) {
+    const items = (State.index[year] && State.index[year][month]) || [];
+    entriesList.innerHTML = '';
+
+    for (const entry of items) {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const img = document.createElement('img');
+      img.className = 'thumb'; img.alt='preview';
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+
+      const d = Utils.niceDate(entry.date);
+      const title = document.createElement('div'); title.className='filename'; title.textContent = d.human;
+      const sub = document.createElement('div'); sub.className='sub'; sub.textContent = d.numeric;
+      const preview = document.createElement('div'); preview.className='preview'; preview.textContent = '(Loading preview...)';
+
+      meta.appendChild(title); meta.appendChild(sub); meta.appendChild(preview);
+      card.appendChild(img); card.appendChild(meta);
+      entriesList.appendChild(card);
+
+      card.addEventListener('click', () => openEntry(entry));
+
+      // Async preview
+      (async ()=>{
+        try {
+          const file = await entry.handle.getFile();
+          let t = await file.text();
+          t = Utils.stripYAML(t);
+          t = t.replace(/!\[[^\]]*\]\([^)]+\)/g,'')
+               .replace(/\[[^\]]*\]\([^)]+\)/g,'')
+               .replace(/[*#`>_~]/g,'')
+               .trim();
+          const first = t.split('\n').map(s=>s.trim()).filter(Boolean)[0] || '(Empty Entry)';
+          preview.textContent = first;
+        } catch { preview.textContent = '(Preview unavailable)'; }
+      })();
+
+      // Async thumbnail
+      if (State.imagesRoot) {
+        (async ()=>{
+          try {
+            const yDir = await State.imagesRoot.getDirectoryHandle(entry.year,{create:false});
+            const url = await FS.findFirstImageURL(yDir, entry.date);
+            if (url) img.src = url;
+          } catch {}
+        })();
+      }
+    }
+  }
+
+  async function openEntry(entry) {
+    const file = await entry.handle.getFile();
+    let text = await file.text();
+
+    // YAML
+    let metadataHTML = '';
+    const kv = Utils.extractYAML(text);
+    if (kv && kv.length) {
+      metadataHTML = `<div class="metadata-box">` +
+        kv.map(({key,val}) => `<div class="meta-row"><span class="meta-key">${Utils.esc(key)}</span><span class="meta-val">${Utils.esc(val)}</span></div>`).join('') +
+        `</div>`;
+    }
+    let body = Utils.stripYAML(text).trim();
+
+    // Render markdown body to HTML
+    let htmlBody = marked.parse(body, { mangle:false, headerIds:false });
+
+    // Remove inline images but keep their order for gallery
+    const temp = document.createElement('div');
+    temp.innerHTML = htmlBody;
+    const inlineImgs = Array.from(temp.querySelectorAll('img'));
+    const inlineSrcs = inlineImgs.map(img => img.getAttribute('src') || '').filter(Boolean);
+    inlineImgs.forEach(img => img.remove());
+    htmlBody = temp.innerHTML;
+
+    // Reader layout
+    reader.innerHTML = `
+      <div class="reader-title">${Utils.esc(entry.name)}</div>
+      ${metadataHTML}
+      <div class="md" id="mdHost">${htmlBody}</div>
+      <div id="galleryHost"></div>
+    `;
+
+    // Build gallery below body (inline order first, then date discovery)
+    await Gallery.buildBelow(entry, inlineSrcs);
+  }
+
+  return { renderSelectors, renderEntries, openEntry, statusEl };
+})();
+
+/* ===========================
+   Gallery
+=========================== */
+const Gallery = {
+  async buildBelow(entry, inlineSrcs) {
+    const host = Utils.byId('galleryHost');
+    host.innerHTML = '';
+    if (!State.imagesRoot) return;
+
+    let yearDir;
+    try { yearDir = await State.imagesRoot.getDirectoryHandle(entry.year,{create:false}); }
+    catch { return; }
+
+    const filenameRe = /(\d{8})(-\d{2})?\.(jpe?g|png|gif)$/i;
+    const ordered = [];
+    for (const src of inlineSrcs) {
+      const m = src.match(filenameRe);
+      if (m) {
+        const name = m[0];
+        try {
+          const fh = await yearDir.getFileHandle(name,{create:false});
+          ordered.push({url: await FS.fileHandleToURL(fh), name});
+        } catch {
+          if (/^file:|^https?:/.test(src)) ordered.push({url: src, name});
+        }
+      } else if (/^file:|^https?:/.test(src)) {
+        ordered.push({url: src, name: src.split('/').pop() || 'image'});
+      }
+    }
+    let imgs = ordered;
+    if (!imgs.length) imgs = await FS.enumerateAllImages(yearDir, entry.date);
+    if (!imgs.length) { State.currentGallery = []; State.currentGalleryIndex = -1; return; }
+
+    // Hero
+    const hero = document.createElement('img');
+    hero.className = 'hero';
+    hero.src = imgs[0].url;
+    hero.alt = 'image';
+    hero.addEventListener('click', () => openLightbox(0));
+
+    // Thumbs
+    const bar = document.createElement('div');
+    bar.className = 'gallery';
+    imgs.forEach((it, idx)=>{
+      const t = document.createElement('img');
+      t.className = 'g-thumb' + (idx===0 ? ' selected' : '');
+      t.src = it.url; t.alt = it.name;
+      t.addEventListener('click', ()=>{
+        hero.src = it.url;
+        bar.querySelectorAll('.g-thumb').forEach(el=>el.classList.remove('selected'));
+        t.classList.add('selected');
+      });
+      bar.appendChild(t);
+    });
+
+    State.currentGallery = imgs;
+    State.currentGalleryIndex = 0;
+
+    host.appendChild(hero);
+    host.appendChild(bar);
+  }
+};
+
+/* ===========================
+   Bootstrap
+=========================== */
+(async function main(){
+  // Restore handles
+  const j = await Storage.get('journalRoot');
+  if (j && await FS.requestRead(j)) {
+    State.journalRoot = j;
+    await Indexer.rebuild(UI.statusEl);
+    await UI.renderSelectors();
+  }
+  const i = await Storage.get('imagesRoot');
+  if (i && await FS.requestRead(i)) {
+    State.imagesRoot = i;
+  }
+
+  // Buttons
+  Utils.byId('pickJournal').addEventListener('click', async ()=>{
+    const h = await window.showDirectoryPicker({mode:'read'}).catch(()=>null);
+    if (!h) return;
+    State.journalRoot = h;
+    await Storage.put('journalRoot', h);
+    await Indexer.rebuild(UI.statusEl);
+    await UI.renderSelectors();
+  });
+
+  Utils.byId('pickImages').addEventListener('click', async ()=>{
+    const h = await window.showDirectoryPicker({mode:'read'}).catch(()=>null);
+    if (!h) return;
+    State.imagesRoot = h;
+    await Storage.put('imagesRoot', h);
+    // Thumbnails and badges load as needed
+  });
+})();
 </script>
 </body>
 </html>
