@@ -177,17 +177,27 @@
       font-size:12px;
       position:relative;
       z-index:2;
-      color:#ffffff; /* always light text, both themes */
 
-      /* strong multi-layer shadow for maximum readability on any image */
+      /* strong multi-layer shadow for maximum readability */
       text-shadow:
-          0 0 3px rgba(0,0,0,0.9),
-          0 0 5px rgba(0,0,0,0.9),
-          0 0 8px rgba(0,0,0,0.8),
-          0 0 12px rgba(0,0,0,0.8);
+          0 0 3px rgba(0,0,0,0.8),
+          0 0 5px rgba(0,0,0,0.7),
+          0 0 8px rgba(0,0,0,0.6),
+          0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .badge{
+      position:absolute;
+      left:6px;
+      bottom:4px;
+      font-size:12px;
+      opacity:.95;
+      z-index:1;
+      text-shadow:0 0 2px rgba(0,0,0,.6);
     }
 
     .hidden{visibility:hidden}
+
   </style>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
@@ -203,6 +213,7 @@
     <select id="yearSelect" disabled></select>
     <select id="monthSelect" disabled></select>
     <button id="themeToggle" title="Toggle theme">Theme</button>
+    <!-- moved status here, since toolbar was removed -->
     <span id="status" class="tint"></span>
   </div>
 </header>
@@ -363,7 +374,7 @@ const FS = {
   async findFirstImageURL(yearDir, yyyymmdd) {
     const yyyy = yyyymmdd.slice(0,4), mm=yyyymmdd.slice(4,6), dd=yyyymmdd.slice(6,8);
     const newBase = yyyymmdd;
-    the oldBase = `${mm}${dd}${yyyy}`;
+    const oldBase = `${mm}${dd}${yyyy}`;
     const candidates = [];
     for (const base of [newBase, oldBase]) {
       for (const ext of State.extList) candidates.push(`${base}.${ext}`);
@@ -489,6 +500,12 @@ const Calendar = (() => {
       num.textContent = d;
       cell.appendChild(num);
 
+      // Photo badge (filled after async)
+      const badge = document.createElement('div');
+      badge.className = 'badge hidden';
+      badge.textContent = '📷';
+      cell.appendChild(badge);
+
       const entry = map.get(dd);
       if (entry) {
         cell.classList.add('has-file');
@@ -508,22 +525,30 @@ const Calendar = (() => {
           const hasMeaningful = t.length > 0;
           if (hasMeaningful) cell.classList.add('filled');
 
-          // Fill background with first image if exists
+          // Photo badge + fill background with first image
           try {
             if (State.imagesRoot) {
               const yDir = await State.imagesRoot.getDirectoryHandle(entry.year, { create:false });
               const imgs = await FS.enumerateAllImages(yDir, entry.date);
               if (imgs.length) {
+                badge.classList.remove('hidden');
+
+                // mark as photo day and use first image as background
                 cell.classList.add('has-photo');
                 cell.style.backgroundImage = `url(${imgs[0].url})`;
+
+                // ensure the image scales nicely inside the day cell
                 cell.style.backgroundSize = 'cover';
                 cell.style.backgroundPosition = 'center';
                 cell.style.backgroundRepeat = 'no-repeat';
+
+                // make sure it looks present
                 cell.style.opacity = '1';
                 cell.style.borderStyle = 'solid';
               }
             }
           } catch {}
+
         })();
 
         // Open entry on click via central selector
