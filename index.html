@@ -19,18 +19,12 @@
 
     /* BASE */
     *{box-sizing:border-box}
-html, body {
-  height: 100%;
-}
-
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font:14px/1.5 system-ui,Segoe UI,Roboto,Arial;
-  overflow:hidden; /* prevent the whole page from scrolling */
-}
-
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font:14px/1.5 system-ui,Segoe UI,Roboto,Arial;
+    }
 
     header{
       display:flex;gap:.5rem;align-items:center;justify-content:space-between;
@@ -47,35 +41,33 @@ body{
 
     main{display:grid;grid-template-columns:40% 60%;height:calc(100vh - 56px)}
 
-/* SIDEBAR */
-aside{
-  border-right:1px solid var(--border);
-  background:var(--panel);
-  display:flex;
-  flex-direction:column;
-  overflow:hidden; /* sidebar itself does not scroll */
-}
+    /* SIDEBAR */
+    aside{
+      border-right:1px solid var(--border);
+      background:var(--panel);
+      display:flex;
+      flex-direction:column;
+    }
 
-.toolbar{
-  display:flex;
-  gap:.5rem;
-  padding:10px;
-  border-bottom:1px solid var(--border);
-  position:sticky;
-  top:0;
-  background:var(--panel);
-  z-index:4;
-  align-items:center;
-  justify-content:space-between;
-}
+    .toolbar{
+      display:flex;
+      gap:.5rem;
+      padding:10px;
+      border-bottom:1px solid var(--border);
+      position:sticky;
+      top:0;
+      background:var(--panel);
+      z-index:4;
+      align-items:center;
+      justify-content:space-between;
+    }
 
-/* Entries list scrolls, calendar stays above it */
-.list{
-  padding:8px;
-  flex:1;
-  overflow:auto;  /* independent scroll for the entry list */
-}
-
+    /* Entries list scrolls, calendar stays pinned above it */
+    .list{
+      padding:8px;
+      flex:1;
+      overflow:auto;
+    }
 
     .card{
       display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:start;
@@ -83,6 +75,11 @@ aside{
       margin-bottom:8px;cursor:pointer
     }
     .card:hover{background:var(--cardHover)}
+    .card.selected{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px var(--accent);
+      background:var(--cardHover);
+    }
     .thumb{width:64px;height:64px;border-radius:8px;object-fit:cover;background:var(--thumbBg);border:1px solid var(--border)}
     .meta{display:flex;flex-direction:column;gap:2px}
     .filename{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -155,6 +152,10 @@ aside{
       border:1px solid var(--border);
       opacity:1;
     }
+    .day.selected{
+      outline:2px solid var(--accent);
+      outline-offset:1px;
+    }
 
     /* when a photo exists, overlay a gradient so the day number stays readable */
     .day.has-photo::before{
@@ -167,19 +168,18 @@ aside{
 
     .day:hover{border-style:solid}
 
-.day-num{
-  font-size:12px;
-  position:relative;
-  z-index:2;
+    .day-num{
+      font-size:12px;
+      position:relative;
+      z-index:2;
 
-  /* MUCH stronger multi-layer shadow for maximum readability */
-  text-shadow:
-      0 0 3px rgba(0,0,0,0.8),
-      0 0 5px rgba(0,0,0,0.7),
-      0 0 8px rgba(0,0,0,0.6),
-      0 0 10px rgba(0,0,0,0.5);
-}
-
+      /* MUCH stronger multi-layer shadow for maximum readability */
+      text-shadow:
+          0 0 3px rgba(0,0,0,0.8),
+          0 0 5px rgba(0,0,0,0.7),
+          0 0 8px rgba(0,0,0,0.6),
+          0 0 10px rgba(0,0,0,0.5);
+    }
 
     .badge{
       position:absolute;
@@ -293,6 +293,9 @@ const State = {
   currentGallery: [],
   currentGalleryIndex: -1,
   extList: ['jpg','jpeg','png','gif'],
+  selectedDate: null,
+  calendarCells: new Map(),     // date -> calendar cell
+  entryCards: new Map(),        // date -> list card
 };
 
 /* ===========================
@@ -454,6 +457,9 @@ const Calendar = (() => {
     wrap.hidden = false;
     clear();
 
+    // reset calendar cell map for the new month
+    State.calendarCells = new Map();
+
     const monthName = new Date(`${year}-${month}-01`)
       .toLocaleDateString(undefined, { month:'long', year:'numeric' })
       .toUpperCase();
@@ -503,6 +509,9 @@ const Calendar = (() => {
       if (entry) {
         cell.classList.add('has-file');
 
+        // register this calendar cell for this date
+        State.calendarCells.set(entry.date, cell);
+
         // Determine emptiness by reading + stripping (emojis count as content)
         (async () => {
           const file = await entry.handle.getFile();
@@ -515,34 +524,34 @@ const Calendar = (() => {
           const hasMeaningful = t.length > 0; // emojis count
           if (hasMeaningful) cell.classList.add('filled'); // solid look per Option 1
 
-// Photo badge + fill background with first image
-try {
-  if (State.imagesRoot) {
-    const yDir = await State.imagesRoot.getDirectoryHandle(entry.year, { create:false });
-    const imgs = await FS.enumerateAllImages(yDir, entry.date);
-    if (imgs.length) {
-      badge.classList.remove('hidden');
+          // Photo badge + fill background with first image
+          try {
+            if (State.imagesRoot) {
+              const yDir = await State.imagesRoot.getDirectoryHandle(entry.year, { create:false });
+              const imgs = await FS.enumerateAllImages(yDir, entry.date);
+              if (imgs.length) {
+                badge.classList.remove('hidden');
 
-      // mark as photo day and use first image as background
-      cell.classList.add('has-photo');
-      cell.style.backgroundImage = `url(${imgs[0].url})`;
+                // mark as photo day and use first image as background
+                cell.classList.add('has-photo');
+                cell.style.backgroundImage = `url(${imgs[0].url})`;
 
-      // ensure the image scales nicely inside the day cell
-      cell.style.backgroundSize = 'cover';        // or 'contain' if you prefer full image with letterboxing
-      cell.style.backgroundPosition = 'center';   // center the crop
-      cell.style.backgroundRepeat = 'no-repeat';
+                // ensure the image scales nicely inside the day cell
+                cell.style.backgroundSize = 'cover';        // or 'contain' if you prefer letterboxing
+                cell.style.backgroundPosition = 'center';
+                cell.style.backgroundRepeat = 'no-repeat';
 
-      // make sure it looks "present"
-      cell.style.opacity = '1';
-      cell.style.borderStyle = 'solid';
-    }
-  }
-} catch {}
+                // make sure it looks \"present\"
+                cell.style.opacity = '1';
+                cell.style.borderStyle = 'solid';
+              }
+            }
+          } catch {}
 
         })();
 
-        // Open entry on click
-        cell.addEventListener('click', () => UI.openEntry(entry));
+        // Open entry on click via central selector
+        cell.addEventListener('click', () => selectEntry(entry));
       } else {
         // No file at all → outlined, low opacity, not clickable
         // cell remains default .day
@@ -554,7 +563,6 @@ try {
 
   return { render };
 })();
-
 
 /* ===========================
    Gallery + Lightbox
@@ -594,14 +602,14 @@ const UI = (() => {
   const statusEl = Utils.byId('status');
 
   function clearReader() {
-    reader.innerHTML = `<div class="empty">Select an entry</div>`;
+    reader.innerHTML = `<div class=\"empty\">Select an entry</div>`;
     State.currentGallery = [];
     State.currentGalleryIndex = -1;
   }
 
   async function renderSelectors() {
     const years = Object.keys(State.index).sort();
-    yearSel.innerHTML = years.map(y=>`<option value="${y}">${y}</option>`).join('');
+    yearSel.innerHTML = years.map(y=>`<option value=\"${y}\">${y}</option>`).join('');
     yearSel.disabled = !years.length;
     const initialYear = localStorage.getItem('last_year') || years[0] || '';
     if (initialYear && years.includes(initialYear)) yearSel.value = initialYear;
@@ -624,7 +632,7 @@ const UI = (() => {
 
   function renderMonths(year) {
     const months = Object.keys(State.index[year]||{}).sort();
-    monthSel.innerHTML = months.map(m=>`<option value="${m}">${m}</option>`).join('');
+    monthSel.innerHTML = months.map(m=>`<option value=\"${m}\">${m}</option>`).join('');
     monthSel.disabled = !months.length;
     const lastMonth = localStorage.getItem('last_month');
     if (lastMonth && months.includes(lastMonth)) monthSel.value = lastMonth;
@@ -638,6 +646,7 @@ const UI = (() => {
   async function renderEntries(year, month) {
     const items = (State.index[year] && State.index[year][month]) || [];
     entriesList.innerHTML = '';
+    State.entryCards = new Map();
 
     for (const entry of items) {
       const card = document.createElement('div');
@@ -658,7 +667,11 @@ const UI = (() => {
       card.appendChild(img); card.appendChild(meta);
       entriesList.appendChild(card);
 
-      card.addEventListener('click', () => openEntry(entry));
+      // register this card by date for cross-highlighting
+      State.entryCards.set(entry.date, card);
+
+      // click: sync calendar + list + reader
+      card.addEventListener('click', () => selectEntry(entry));
 
       // Async preview
       (async ()=>{
@@ -696,8 +709,8 @@ const UI = (() => {
     let metadataHTML = '';
     const kv = Utils.extractYAML(text);
     if (kv && kv.length) {
-      metadataHTML = `<div class="metadata-box">` +
-        kv.map(({key,val}) => `<div class="meta-row"><span class="meta-key">${Utils.esc(key)}</span><span class="meta-val">${Utils.esc(val)}</span></div>`).join('') +
+      metadataHTML = `<div class=\"metadata-box\">` +
+        kv.map(({key,val}) => `<div class=\"meta-row\"><span class=\"meta-key\">${Utils.esc(key)}</span><span class=\"meta-val\">${Utils.esc(val)}</span></div>`).join('') +
         `</div>`;
     }
     let body = Utils.stripYAML(text).trim();
@@ -715,10 +728,10 @@ const UI = (() => {
 
     // Reader layout
     reader.innerHTML = `
-      <div class="reader-title">${Utils.esc(entry.name)}</div>
+      <div class=\"reader-title\">${Utils.esc(entry.name)}</div>
       ${metadataHTML}
-      <div class="md" id="mdHost">${htmlBody}</div>
-      <div id="galleryHost"></div>
+      <div class=\"md\" id=\"mdHost\">${htmlBody}</div>
+      <div id=\"galleryHost\"></div>
     `;
 
     // Build gallery below body (inline order first, then date discovery)
@@ -727,6 +740,43 @@ const UI = (() => {
 
   return { renderSelectors, renderEntries, openEntry, statusEl };
 })();
+
+/* ===========================
+   Central selection helper (calendar <-> list <-> reader)
+=========================== */
+function selectEntry(entry) {
+  const dateKey = entry.date;
+  State.selectedDate = dateKey;
+
+  // Clear previous selection
+  if (State.entryCards) {
+    for (const card of State.entryCards.values()) {
+      card.classList.remove('selected');
+    }
+  }
+  if (State.calendarCells) {
+    for (const cell of State.calendarCells.values()) {
+      cell.classList.remove('selected');
+    }
+  }
+
+  // Highlight list card and scroll it into view
+  const card = State.entryCards && State.entryCards.get(dateKey);
+  if (card) {
+    card.classList.add('selected');
+    card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  // Highlight calendar cell
+  const cell = State.calendarCells && State.calendarCells.get(dateKey);
+  if (cell) {
+    cell.classList.add('selected');
+    cell.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  // Finally, open the entry in the reader pane
+  UI.openEntry(entry);
+}
 
 /* ===========================
    Gallery
