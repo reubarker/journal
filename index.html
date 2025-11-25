@@ -63,7 +63,7 @@
       overflow:hidden; /* calendar fixed, list scrolls inside */
     }
 
-    /* Entries list (no toolbar now) */
+    /* Entries list */
     .list{
       padding:8px;
       flex:1;
@@ -177,13 +177,14 @@
       font-size:12px;
       position:relative;
       z-index:2;
+      color:#ffffff; /* always light text, both themes */
 
-      /* strong multi-layer shadow for maximum readability */
+      /* strong multi-layer shadow for maximum readability on any image */
       text-shadow:
-          0 0 3px rgba(0,0,0,0.8),
-          0 0 5px rgba(0,0,0,0.7),
-          0 0 8px rgba(0,0,0,0.6),
-          0 0 10px rgba(0,0,0,0.5);
+          0 0 3px rgba(0,0,0,0.9),
+          0 0 5px rgba(0,0,0,0.9),
+          0 0 8px rgba(0,0,0,0.8),
+          0 0 12px rgba(0,0,0,0.8);
     }
 
     .badge{
@@ -213,7 +214,6 @@
     <select id="yearSelect" disabled></select>
     <select id="monthSelect" disabled></select>
     <button id="themeToggle" title="Toggle theme">Theme</button>
-    <!-- moved status here, since toolbar was removed -->
     <span id="status" class="tint"></span>
   </div>
 </header>
@@ -536,19 +536,14 @@ const Calendar = (() => {
                 // mark as photo day and use first image as background
                 cell.classList.add('has-photo');
                 cell.style.backgroundImage = `url(${imgs[0].url})`;
-
-                // ensure the image scales nicely inside the day cell
                 cell.style.backgroundSize = 'cover';
                 cell.style.backgroundPosition = 'center';
                 cell.style.backgroundRepeat = 'no-repeat';
-
-                // make sure it looks present
                 cell.style.opacity = '1';
                 cell.style.borderStyle = 'solid';
               }
             }
           } catch {}
-
         })();
 
         // Open entry on click via central selector
