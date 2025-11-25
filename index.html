@@ -473,24 +473,30 @@ const Calendar = (() => {
           const hasMeaningful = t.length > 0; // emojis count
           if (hasMeaningful) cell.classList.add('filled'); // solid look per Option 1
 
-          // Photo badge + fill background with first image
-          try {
-            if (State.imagesRoot) {
-              const yDir = await State.imagesRoot.getDirectoryHandle(entry.year, { create:false });
-              const imgs = await FS.enumerateAllImages(yDir, entry.date);
-              if (imgs.length) {
-                badge.classList.remove('hidden');
+// Photo badge + fill background with first image
+try {
+  if (State.imagesRoot) {
+    const yDir = await State.imagesRoot.getDirectoryHandle(entry.year, { create:false });
+    const imgs = await FS.enumerateAllImages(yDir, entry.date);
+    if (imgs.length) {
+      badge.classList.remove('hidden');
 
-                // mark as photo day and use first image as background
-                cell.classList.add('has-photo');
-                cell.style.backgroundImage = `url(${imgs[0].url})`;
+      // mark as photo day and use first image as background
+      cell.classList.add('has-photo');
+      cell.style.backgroundImage = `url(${imgs[0].url})`;
 
-                // make sure it looks "present"
-                cell.style.opacity = '1';
-                cell.style.borderStyle = 'solid';
-              }
-            }
-          } catch {}
+      // ensure the image scales nicely inside the day cell
+      cell.style.backgroundSize = 'cover';        // or 'contain' if you prefer full image with letterboxing
+      cell.style.backgroundPosition = 'center';   // center the crop
+      cell.style.backgroundRepeat = 'no-repeat';
+
+      // make sure it looks "present"
+      cell.style.opacity = '1';
+      cell.style.borderStyle = 'solid';
+    }
+  }
+} catch {}
+
         })();
 
         // Open entry on click
