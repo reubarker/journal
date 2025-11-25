@@ -19,11 +19,19 @@
 
     /* BASE */
     *{box-sizing:border-box}
+
+    html, body {
+      height: 100%;
+    }
+
     body{
       margin:0;
       background:var(--bg);
       color:var(--text);
       font:14px/1.5 system-ui,Segoe UI,Roboto,Arial;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden; /* window itself won't scroll */
     }
 
     header{
@@ -39,7 +47,12 @@
     button:hover{border-color:#334155}
     .tint{color:var(--muted);font-size:12px;margin-left:.5rem}
 
-    main{display:grid;grid-template-columns:40% 60%;height:calc(100vh - 56px)}
+    main{
+      display:grid;
+      grid-template-columns:40% 60%;
+      flex:1;
+      min-height:0; /* allow children to scroll */
+    }
 
     /* SIDEBAR */
     aside{
@@ -47,6 +60,7 @@
       background:var(--panel);
       display:flex;
       flex-direction:column;
+      overflow:hidden; /* calendar fixed, list scrolls inside */
     }
 
     .toolbar{
@@ -90,7 +104,11 @@
     }
 
     /* READER */
-    article{overflow:auto;padding:16px}
+    article{
+      padding:16px;
+      overflow:auto;
+      min-height:0; /* allow scrolling within grid cell */
+    }
     .reader-title{font-size:1.4rem;font-weight:600;margin-bottom:1rem;color:var(--text);word-break:break-word}
     .metadata-box{
       background:var(--chip);border:1px solid var(--border);border-radius:8px;
@@ -173,7 +191,7 @@
       position:relative;
       z-index:2;
 
-      /* MUCH stronger multi-layer shadow for maximum readability */
+      /* strong multi-layer shadow for maximum readability */
       text-shadow:
           0 0 3px rgba(0,0,0,0.8),
           0 0 5px rgba(0,0,0,0.7),
@@ -522,7 +540,7 @@ const Calendar = (() => {
                .replace(/[*#`>_~]/g, '')              // remove md symbols
                .trim();
           const hasMeaningful = t.length > 0; // emojis count
-          if (hasMeaningful) cell.classList.add('filled'); // solid look per Option 1
+          if (hasMeaningful) cell.classList.add('filled'); // solid look
 
           // Photo badge + fill background with first image
           try {
@@ -537,11 +555,11 @@ const Calendar = (() => {
                 cell.style.backgroundImage = `url(${imgs[0].url})`;
 
                 // ensure the image scales nicely inside the day cell
-                cell.style.backgroundSize = 'cover';        // or 'contain' if you prefer letterboxing
+                cell.style.backgroundSize = 'cover';
                 cell.style.backgroundPosition = 'center';
                 cell.style.backgroundRepeat = 'no-repeat';
 
-                // make sure it looks \"present\"
+                // make sure it looks present
                 cell.style.opacity = '1';
                 cell.style.borderStyle = 'solid';
               }
@@ -602,14 +620,14 @@ const UI = (() => {
   const statusEl = Utils.byId('status');
 
   function clearReader() {
-    reader.innerHTML = `<div class=\"empty\">Select an entry</div>`;
+    reader.innerHTML = `<div class="empty">Select an entry</div>`;
     State.currentGallery = [];
     State.currentGalleryIndex = -1;
   }
 
   async function renderSelectors() {
     const years = Object.keys(State.index).sort();
-    yearSel.innerHTML = years.map(y=>`<option value=\"${y}\">${y}</option>`).join('');
+    yearSel.innerHTML = years.map(y=>`<option value="${y}">${y}</option>`).join('');
     yearSel.disabled = !years.length;
     const initialYear = localStorage.getItem('last_year') || years[0] || '';
     if (initialYear && years.includes(initialYear)) yearSel.value = initialYear;
@@ -632,7 +650,7 @@ const UI = (() => {
 
   function renderMonths(year) {
     const months = Object.keys(State.index[year]||{}).sort();
-    monthSel.innerHTML = months.map(m=>`<option value=\"${m}\">${m}</option>`).join('');
+    monthSel.innerHTML = months.map(m=>`<option value="${m}">${m}</option>`).join('');
     monthSel.disabled = !months.length;
     const lastMonth = localStorage.getItem('last_month');
     if (lastMonth && months.includes(lastMonth)) monthSel.value = lastMonth;
@@ -709,8 +727,8 @@ const UI = (() => {
     let metadataHTML = '';
     const kv = Utils.extractYAML(text);
     if (kv && kv.length) {
-      metadataHTML = `<div class=\"metadata-box\">` +
-        kv.map(({key,val}) => `<div class=\"meta-row\"><span class=\"meta-key\">${Utils.esc(key)}</span><span class=\"meta-val\">${Utils.esc(val)}</span></div>`).join('') +
+      metadataHTML = `<div class="metadata-box">` +
+        kv.map(({key,val}) => `<div class="meta-row"><span class="meta-key">${Utils.esc(key)}</span><span class="meta-val">${Utils.esc(val)}</span></div>`).join('') +
         `</div>`;
     }
     let body = Utils.stripYAML(text).trim();
@@ -728,10 +746,10 @@ const UI = (() => {
 
     // Reader layout
     reader.innerHTML = `
-      <div class=\"reader-title\">${Utils.esc(entry.name)}</div>
+      <div class="reader-title">${Utils.esc(entry.name)}</div>
       ${metadataHTML}
-      <div class=\"md\" id=\"mdHost\">${htmlBody}</div>
-      <div id=\"galleryHost\"></div>
+      <div class="md" id="mdHost">${htmlBody}</div>
+      <div id="galleryHost"></div>
     `;
 
     // Build gallery below body (inline order first, then date discovery)
@@ -760,18 +778,17 @@ function selectEntry(entry) {
     }
   }
 
-  // Highlight list card and scroll it into view
+  // Highlight list card and scroll it into view (within the list pane)
   const card = State.entryCards && State.entryCards.get(dateKey);
   if (card) {
     card.classList.add('selected');
     card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
-  // Highlight calendar cell
+  // Highlight calendar cell (no scroll; calendar is static)
   const cell = State.calendarCells && State.calendarCells.get(dateKey);
   if (cell) {
     cell.classList.add('selected');
-    cell.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
   // Finally, open the entry in the reader pane
