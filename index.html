@@ -19,7 +19,18 @@
 
     /* BASE */
     *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,Segoe UI,Roboto,Arial}
+html, body {
+  height: 100%;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:14px/1.5 system-ui,Segoe UI,Roboto,Arial;
+  overflow:hidden; /* prevent the whole page from scrolling */
+}
+
 
     header{
       display:flex;gap:.5rem;align-items:center;justify-content:space-between;
@@ -36,33 +47,35 @@
 
     main{display:grid;grid-template-columns:40% 60%;height:calc(100vh - 56px)}
 
-    /* SIDEBAR */
-    aside{
-      border-right:1px solid var(--border);
-      background:var(--panel);
-      display:flex;
-      flex-direction:column;
-    }
+/* SIDEBAR */
+aside{
+  border-right:1px solid var(--border);
+  background:var(--panel);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden; /* sidebar itself does not scroll */
+}
 
-    .toolbar{
-      display:flex;
-      gap:.5rem;
-      padding:10px;
-      border-bottom:1px solid var(--border);
-      position:sticky;
-      top:0;
-      background:var(--panel);
-      z-index:4;
-      align-items:center;
-      justify-content:space-between;
-    }
+.toolbar{
+  display:flex;
+  gap:.5rem;
+  padding:10px;
+  border-bottom:1px solid var(--border);
+  position:sticky;
+  top:0;
+  background:var(--panel);
+  z-index:4;
+  align-items:center;
+  justify-content:space-between;
+}
 
-    /* Entries list scrolls, calendar stays pinned above it */
-    .list{
-      padding:8px;
-      flex:1;
-      overflow:auto;
-    }
+/* Entries list scrolls, calendar stays above it */
+.list{
+  padding:8px;
+  flex:1;
+  overflow:auto;  /* independent scroll for the entry list */
+}
+
 
     .card{
       display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:start;
