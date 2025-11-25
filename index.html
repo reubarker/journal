@@ -95,20 +95,62 @@
     }
     .weekday{color:var(--muted);font-size:11px;text-align:center;margin-bottom:6px}
     .day{
-      position:relative;border:1px dashed var(--border);border-radius:8px;
-      min-height:42px;padding:4px 6px;cursor:default;color:var(--text);
-      display:flex;align-items:flex-start;justify-content:flex-end;opacity:.7
+      position:relative;
+      border:1px dashed var(--border);
+      border-radius:8px;
+      min-height:42px;
+      padding:4px 6px;
+      cursor:default;
+      color:var(--text);
+      display:flex;
+      align-items:flex-start;
+      justify-content:flex-end;
+      opacity:.7;
+      overflow:hidden;
+
+      /* prepare for photo fill */
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
     }
     .day.has-file{cursor:pointer}
     .day.filled{
-      background:var(--good); border:1px solid var(--border); opacity:1
+      background:var(--good);
+      border:1px solid var(--border);
+      opacity:1;
     }
+
+    /* when a photo exists, overlay a gradient so the day number stays readable */
+    .day.has-photo::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:linear-gradient(to bottom, rgba(0,0,0,.10), rgba(0,0,0,.40));
+      pointer-events:none;
+    }
+
     .day:hover{border-style:solid}
-    .day-num{font-size:12px;opacity:.9}
-    .badge{
-      position:absolute;left:6px;bottom:4px;font-size:12px;opacity:.9
+
+    .day-num{
+      font-size:12px;
+      opacity:.95;
+      position:relative;
+      z-index:1;
+      text-shadow:0 0 2px rgba(0,0,0,.6);
     }
+
+    .badge{
+      position:absolute;
+      left:6px;
+      bottom:4px;
+      font-size:12px;
+      opacity:.95;
+      z-index:1;
+      text-shadow:0 0 2px rgba(0,0,0,.6);
+    }
+
     .hidden{visibility:hidden}
+
   </style>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
@@ -377,7 +419,7 @@ const Calendar = (() => {
 
     // Weekday labels
     const header = document.createDocumentFragment();
-    weekdays.forEach(w=>{
+    weekdays.forEach(w => {
       const h = document.createElement('div');
       h.className = 'weekday';
       h.textContent = w;
@@ -390,7 +432,7 @@ const Calendar = (() => {
 
     // Dynamic height: just render the exact number of rows needed
     // Add leading blanks for offset
-    for (let i=0;i<firstDow;i++){
+    for (let i = 0; i < firstDow; i++) {
       const blank = document.createElement('div');
       grid.appendChild(blank);
     }
@@ -399,10 +441,11 @@ const Calendar = (() => {
     const map = new Map();
     items.forEach(e => map.set(e.date.slice(6,8), e)); // key = dd
 
-    for (let d=1; d<=days; d++){
+    for (let d = 1; d <= days; d++) {
       const dd = Utils.pad(d);
       const cell = document.createElement('div');
       cell.className = 'day';
+
       const num = document.createElement('div');
       num.className = 'day-num';
       num.textContent = d;
@@ -419,23 +462,33 @@ const Calendar = (() => {
         cell.classList.add('has-file');
 
         // Determine emptiness by reading + stripping (emojis count as content)
-        (async ()=>{
+        (async () => {
           const file = await entry.handle.getFile();
           let t = await file.text();
           t = Utils.stripYAML(t);
-          t = t.replace(/!\[[^\]]*\]\([^)]+\)/g,'')  // remove images
-               .replace(/\[[^\]]*\]\([^)]+\)/g,'')   // remove links
-               .replace(/[*#`>_~]/g,'')              // remove md symbols
+          t = t.replace(/!\[[^\]]*\]\([^)]+\)/g, '')  // remove images
+               .replace(/\[[^\]]*\]\([^)]+\)/g, '')   // remove links
+               .replace(/[*#`>_~]/g, '')              // remove md symbols
                .trim();
           const hasMeaningful = t.length > 0; // emojis count
           if (hasMeaningful) cell.classList.add('filled'); // solid look per Option 1
 
-          // Photo badge
+          // Photo badge + fill background with first image
           try {
             if (State.imagesRoot) {
-              const yDir = await State.imagesRoot.getDirectoryHandle(entry.year,{create:false});
+              const yDir = await State.imagesRoot.getDirectoryHandle(entry.year, { create:false });
               const imgs = await FS.enumerateAllImages(yDir, entry.date);
-              if (imgs.length) badge.classList.remove('hidden');
+              if (imgs.length) {
+                badge.classList.remove('hidden');
+
+                // mark as photo day and use first image as background
+                cell.classList.add('has-photo');
+                cell.style.backgroundImage = `url(${imgs[0].url})`;
+
+                // make sure it looks "present"
+                cell.style.opacity = '1';
+                cell.style.borderStyle = 'solid';
+              }
             }
           } catch {}
         })();
@@ -443,7 +496,7 @@ const Calendar = (() => {
         // Open entry on click
         cell.addEventListener('click', () => UI.openEntry(entry));
       } else {
-        // No file at all → treat similar to empty look (outlined, low opacity), not clickable
+        // No file at all → outlined, low opacity, not clickable
         // cell remains default .day
       }
 
@@ -453,6 +506,7 @@ const Calendar = (() => {
 
   return { render };
 })();
+
 
 /* ===========================
    Gallery + Lightbox
