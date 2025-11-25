@@ -131,13 +131,19 @@
 
     .day:hover{border-style:solid}
 
-    .day-num{
-      font-size:12px;
-      opacity:.95;
-      position:relative;
-      z-index:1;
-      text-shadow:0 0 2px rgba(0,0,0,.6);
-    }
+.day-num{
+  font-size:12px;
+  position:relative;
+  z-index:2;
+
+  /* MUCH stronger multi-layer shadow for maximum readability */
+  text-shadow:
+      0 0 3px rgba(0,0,0,0.8),
+      0 0 5px rgba(0,0,0,0.7),
+      0 0 8px rgba(0,0,0,0.6),
+      0 0 10px rgba(0,0,0,0.5);
+}
+
 
     .badge{
       position:absolute;
